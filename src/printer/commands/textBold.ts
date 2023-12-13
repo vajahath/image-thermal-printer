@@ -1,4 +1,4 @@
-import { ESC } from './common';
+import { ESC } from './common.js';
 
 /**
  * Turn emphasized mode on/off

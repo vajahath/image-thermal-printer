@@ -1,4 +1,4 @@
-import { GS } from './common';
+import { GS } from './common.js';
 
 /**
  * QR Code: Set the size of module

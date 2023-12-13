@@ -1,4 +1,4 @@
-import { GS } from './common';
+import { GS } from './common.js';
 
 /**
  * Select cut mode and cut paper

@@ -1,4 +1,4 @@
-import { GS } from './common';
+import { GS } from './common.js';
 
 /**
  * QR Code: Print the symbol data in the symbol storage area

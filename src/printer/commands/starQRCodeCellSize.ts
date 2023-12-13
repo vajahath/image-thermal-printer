@@ -1,4 +1,4 @@
-import { ESC, GS } from './common';
+import { ESC, GS } from './common.js';
 
 /**
  * Set QR code cell
