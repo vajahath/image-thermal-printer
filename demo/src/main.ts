@@ -10,7 +10,8 @@ document.getElementById('test-print')?.addEventListener('click', async () => {
 
   const printContent = await generatePrintCommandsForImage('/the-2-time.webp', {
     cutAfterPrint: true,
-    newLinesAfterImage: 10,
+    newLinesAfterImage: 3,
+    printerWidthInPx: 300,
   });
 
   console.log('Prepared print data. Starting to print', printContent);

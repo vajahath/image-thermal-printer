@@ -9,13 +9,19 @@ export async function generatePrintCommandsForImage(
   imageToPrint: string,
   printerOptions: IPrinterOptions
 ) {
-  const processableImage = await readImage(imageToPrint);
-
-  const transformedImage = floydSteinberg(processableImage);
+  const canvasImageData = await readImage(imageToPrint, printerOptions.printerWidthInPx);
+  const floydImage = floydSteinberg(canvasImageData);
 
   const commands: Cmd[] = [initialize()];
 
-  commands.push(image(transformedImage));
+  if (printerOptions.newLinesBeforeImage) {
+    let index = 0;
+    for (; index <= printerOptions.newLinesBeforeImage; index++) {
+      commands.push(newLine());
+    }
+  }
+
+  commands.push(image(floydImage));
 
   if (printerOptions.newLinesAfterImage) {
     let index = 0;
@@ -28,24 +34,24 @@ export async function generatePrintCommandsForImage(
     cut();
   }
 
-  commands.push(newLine());
-
   return getData(commands);
 }
 
 export interface IPrinterOptions {
-  cutAfterPrint: boolean;
-  newLinesAfterImage: number;
+  printerWidthInPx: number;
+  cutAfterPrint?: boolean;
+  newLinesAfterImage?: number;
+  newLinesBeforeImage?: number;
 }
 
-export function readImage(src: string) {
+export function readImage(src: string, printWidthInPx: number) {
   return new Promise<Image>((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = '';
     img.onload = () => {
       const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
+      canvas.width = printWidthInPx;
+      canvas.height = (canvas.width * img.height) / img.width;
 
       const context = canvas.getContext('2d');
       if (context == null) {
@@ -53,12 +59,12 @@ export function readImage(src: string) {
         return;
       }
 
-      context.drawImage(img, 0, 0);
-      const { data } = context.getImageData(0, 0, img.width, img.height);
+      context.drawImage(img, 0, 0, img.width, img.height, 0, 0, canvas.width, canvas.height);
+      const { data } = context.getImageData(0, 0, canvas.width, canvas.height);
       resolve({
         data: new Uint8Array(data),
-        width: img.width,
-        height: img.height,
+        width: canvas.width,
+        height: canvas.height,
       });
     };
     img.onerror = err => reject(err);
