@@ -29,6 +29,8 @@ export async function generatePrintCommandsForImage(
     cut();
   }
 
+  commands.push(newLine());
+
   return getData(commands);
 }
 
