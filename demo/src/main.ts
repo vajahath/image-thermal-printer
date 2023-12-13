@@ -1,5 +1,5 @@
 import './style.css';
-import { generatePrintCommandsForImage } from 'image-thermal-printer';
+import { generatePrintCommandsForImage } from '@vaju/image-thermal-printer';
 
 let device: USBDevice | undefined;
 

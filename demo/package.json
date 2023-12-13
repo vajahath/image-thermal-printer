@@ -14,6 +14,6 @@
     "vite": "^5.0.8"
   },
   "dependencies": {
-    "image-thermal-printer": "file:../image-thermal-printer-0.0.1.tgz"
+    "@vaju/image-thermal-printer": "file:../vaju-image-thermal-printer-0.1.0.tgz"
   }
 }
