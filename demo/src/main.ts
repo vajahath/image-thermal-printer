@@ -1,17 +1,43 @@
 import './style.css';
 import { generatePrintCommandsForImage } from 'image-thermal-printer';
 
-const image = '/the-2-time.webp';
-const blob = await fetch(image).then(response => {
-  if (!response.ok) throw new Error('Unable to get image');
-  console.log(response);
-  return response.blob();
+let device: USBDevice | undefined;
+
+document.getElementById('test-print')?.addEventListener('click', async () => {
+  await connectPrinter();
+  console.log(device);
+  console.log('Clicked, preparing data...');
+
+  const printContent = await generatePrintCommandsForImage('/the-2-time.webp', {
+    cutAfterPrint: true,
+    newLinesAfterImage: 10,
+  });
+
+  console.log('Prepared print data. Starting to print', printContent);
+
+  if (!device) {
+    throw new Error('Print device not found');
+  }
+
+  await device.transferOut(3, printContent);
+  console.log('Print completed');
 });
 
-const printContent = await generatePrintCommandsForImage(
-  blob,
-  { width: 256, height: 256 },
-  { cutAfterPrint: true, newLinesAfterImage: 0 }
-);
+async function connectPrinter() {
+  if (device) {
+    console.log('already connected to device');
+    return;
+  }
 
-console.log({ printContent });
+  device = await navigator.usb.requestDevice({
+    filters: [],
+  });
+
+  console.log(device.productName);
+  console.log(device.manufacturerName);
+  console.log(device);
+
+  await device.open();
+  await device.selectConfiguration(1);
+  await device.claimInterface(0);
+}

@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@types/w3c-web-usb": "^1.0.10",
     "typescript": "^5.2.2",
     "vite": "^5.0.8"
   },
