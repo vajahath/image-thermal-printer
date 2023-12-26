@@ -1,4 +1,4 @@
-import { Image } from './image/Image.js';
+import { type Image } from './image/Image.js';
 import { floydSteinberg } from './image/transforms/index.js';
 
 import { initialize, image, Cmd, cut, newLine, getData } from './printer/index.js';
@@ -6,45 +6,67 @@ import { initialize, image, Cmd, cut, newLine, getData } from './printer/index.j
 export { Cmd };
 
 export async function generatePrintCommandsForImage(
-  imageToPrint: string,
-  printerOptions: IPrinterOptions
+  options:
+    | { imageToPrint: string; printerOptions: IPrinterOptionsForImage }
+    | {
+        canvasElement: HTMLCanvasElement;
+        printerOptions: BaseOptions;
+      }
 ) {
-  const canvasImageData = await readImage(imageToPrint, printerOptions.printerWidthInPx);
+  const canvasImageData =
+    'canvasElement' in options
+      ? readCanvas(options.canvasElement)
+      : await readImage(options.imageToPrint, options.printerOptions.printerWidthInPx);
   const floydImage = floydSteinberg(canvasImageData);
 
   const commands: Cmd[] = [initialize()];
 
-  if (printerOptions.newLinesBeforeImage) {
+  if (options.printerOptions.newLinesBeforeImage) {
     let index = 0;
-    for (; index <= printerOptions.newLinesBeforeImage; index++) {
+    for (; index <= options.printerOptions.newLinesBeforeImage; index++) {
       commands.push(newLine());
     }
   }
 
   commands.push(image(floydImage));
 
-  if (printerOptions.newLinesAfterImage) {
+  if (options.printerOptions.newLinesAfterImage) {
     let index = 0;
-    for (; index <= printerOptions.newLinesAfterImage; index++) {
+    for (; index <= options.printerOptions.newLinesAfterImage; index++) {
       commands.push(newLine());
     }
   }
 
-  if (printerOptions.cutAfterPrint) {
-    cut();
+  if (options.printerOptions.cutAfterPrint) {
+    commands.push(cut());
   }
 
   return getData(commands);
 }
 
-export interface IPrinterOptions {
+export interface IPrinterOptionsForImage extends BaseOptions {
   printerWidthInPx: number;
+}
+
+export interface BaseOptions {
   cutAfterPrint?: boolean;
   newLinesAfterImage?: number;
   newLinesBeforeImage?: number;
 }
 
-export function readImage(src: string, printWidthInPx: number) {
+function readCanvas(canvasElement: HTMLCanvasElement): Image {
+  return {
+    data: new Uint8Array(
+      canvasElement
+        .getContext('2d')!
+        .getImageData(0, 0, canvasElement.width, canvasElement.height).data
+    ),
+    width: canvasElement.width,
+    height: canvasElement.height,
+  };
+}
+
+function readImage(src: string, printWidthInPx: number) {
   return new Promise<Image>((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = '';
