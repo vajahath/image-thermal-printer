@@ -1,15 +1,30 @@
-import { Image } from './image/Image.js';
+import { type Image } from './image/Image.js';
 import { floydSteinberg } from './image/transforms/index.js';
 
 import { initialize, image, Cmd, cut, newLine, getData } from './printer/index.js';
 
 export { Cmd };
 
+export function generatePrintCommandsForCanvas(
+  canvasElement: HTMLCanvasElement,
+  printerOptions: BaseOptions
+) {
+  const canvasImageData = readCanvas(canvasElement);
+  return canvasImageDataToCmdBuffer(canvasImageData, printerOptions);
+}
+
 export async function generatePrintCommandsForImage(
   imageToPrint: string,
-  printerOptions: IPrinterOptions
+  printerOptions: IPrinterOptionsForImage
 ) {
   const canvasImageData = await readImage(imageToPrint, printerOptions.printerWidthInPx);
+  return canvasImageDataToCmdBuffer(canvasImageData, printerOptions);
+}
+
+function canvasImageDataToCmdBuffer(
+  canvasImageData: Image,
+  printerOptions: BaseOptions
+): Uint8Array {
   const floydImage = floydSteinberg(canvasImageData);
 
   const commands: Cmd[] = [initialize()];
@@ -31,20 +46,35 @@ export async function generatePrintCommandsForImage(
   }
 
   if (printerOptions.cutAfterPrint) {
-    cut();
+    commands.push(cut());
   }
 
   return getData(commands);
 }
 
-export interface IPrinterOptions {
+export interface IPrinterOptionsForImage extends BaseOptions {
   printerWidthInPx: number;
+}
+
+export interface BaseOptions {
   cutAfterPrint?: boolean;
   newLinesAfterImage?: number;
   newLinesBeforeImage?: number;
 }
 
-export function readImage(src: string, printWidthInPx: number) {
+function readCanvas(canvasElement: HTMLCanvasElement): Image {
+  return {
+    data: new Uint8Array(
+      canvasElement
+        .getContext('2d')!
+        .getImageData(0, 0, canvasElement.width, canvasElement.height).data
+    ),
+    width: canvasElement.width,
+    height: canvasElement.height,
+  };
+}
+
+function readImage(src: string, printWidthInPx: number) {
   return new Promise<Image>((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = '';

@@ -8,7 +8,7 @@ document.getElementById('test-print')?.addEventListener('click', async () => {
   console.log(device);
   console.log('Clicked, preparing data...');
 
-  const printContent: Uint8Array = await generatePrintCommandsForImage('/the-2-time.webp', {
+  const printContent: Uint8Array = await generatePrintCommandsForImage('/text.png', {
     cutAfterPrint: true,
     newLinesAfterImage: 3,
     printerWidthInPx: 377,

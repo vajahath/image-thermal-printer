@@ -1,3 +1,5 @@
+import { generatePrintCommandsForCanvas } from '@vaju/image-thermal-printer';
+
 function readImage(src: string, printWidthInMm: number) {
   return new Promise<HTMLCanvasElement>((resolve, reject) => {
     const img = new Image();
@@ -24,8 +26,51 @@ function readImage(src: string, printWidthInMm: number) {
 
 const canvasHolderDiv = document.getElementById('canvas-holder') as HTMLDivElement;
 
-const canvas = await readImage('/text.png', 400);
+const canvas = await readImage('/insta.png', 377);
 
 canvasHolderDiv.appendChild(canvas);
+
+const printButton = document.getElementById('print') as HTMLButtonElement;
+
+let device: USBDevice | undefined;
+
+printButton.addEventListener('click', async () => {
+  await connectPrinter();
+  console.log(device);
+  console.log('Clicked, preparing data...');
+
+  const printContent = generatePrintCommandsForCanvas(canvas, {
+    cutAfterPrint: true,
+    newLinesAfterImage: 3,
+  });
+
+  console.log('Prepared print data. Starting to print', printContent);
+
+  if (!device) {
+    throw new Error('Print device not found');
+  }
+
+  await device.transferOut(3, printContent);
+  console.log('Print completed');
+});
+
+async function connectPrinter() {
+  if (device) {
+    console.log('already connected to device');
+    return;
+  }
+
+  device = await navigator.usb.requestDevice({
+    filters: [],
+  });
+
+  console.log(device.productName);
+  console.log(device.manufacturerName);
+  console.log(device);
+
+  await device.open();
+  await device.selectConfiguration(1);
+  await device.claimInterface(0);
+}
 
 export {};
