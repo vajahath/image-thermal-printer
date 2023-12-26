@@ -11,12 +11,21 @@ npm i @vaju/image-thermal-printer
 ## Usage
 
 ```ts
-import { generatePrintCommandsForImage } from '@vaju/image-thermal-printer';
+import { generatePrintCommandsForImage, generatePrintCommandsForCanvas } from '@vaju/image-thermal-printer';
 
+// To print from image
 const printContent: Uint8Array = await generatePrintCommandsForImage('/the-2-time.webp', {
   cutAfterPrint: true,
   newLinesAfterImage: 3,
   printerWidthInPx: 300,
+});
+
+// To print from canvas
+// Note that the canvas's with should match the `printerWidthInPx`
+// Else it won't print
+const printContent: Uint8Array = await generatePrintCommandsForCanvas(htmlCanvasElement, {
+  cutAfterPrint: true,
+  newLinesAfterImage: 3,
 });
 ```
 
