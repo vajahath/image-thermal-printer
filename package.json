@@ -1,6 +1,6 @@
 {
   "name": "@vaju/image-thermal-printer",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "type": "module",
   "exports": "./dist/index.js",
   "typings": "./dist/index.d.ts",
