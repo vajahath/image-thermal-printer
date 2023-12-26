@@ -5,39 +5,47 @@ import { initialize, image, Cmd, cut, newLine, getData } from './printer/index.j
 
 export { Cmd };
 
-export async function generatePrintCommandsForImage(
-  options:
-    | { imageToPrint: string; printerOptions: IPrinterOptionsForImage }
-    | {
-        canvasElement: HTMLCanvasElement;
-        printerOptions: BaseOptions;
-      }
+export function generatePrintCommandsForCanvas(
+  canvasElement: HTMLCanvasElement,
+  printerOptions: BaseOptions
 ) {
-  const canvasImageData =
-    'canvasElement' in options
-      ? readCanvas(options.canvasElement)
-      : await readImage(options.imageToPrint, options.printerOptions.printerWidthInPx);
+  const canvasImageData = readCanvas(canvasElement);
+  return canvasImageDataToCmdBuffer(canvasImageData, printerOptions);
+}
+
+export async function generatePrintCommandsForImage(
+  imageToPrint: string,
+  printerOptions: IPrinterOptionsForImage
+) {
+  const canvasImageData = await readImage(imageToPrint, printerOptions.printerWidthInPx);
+  return canvasImageDataToCmdBuffer(canvasImageData, printerOptions);
+}
+
+function canvasImageDataToCmdBuffer(
+  canvasImageData: Image,
+  printerOptions: BaseOptions
+): Uint8Array {
   const floydImage = floydSteinberg(canvasImageData);
 
   const commands: Cmd[] = [initialize()];
 
-  if (options.printerOptions.newLinesBeforeImage) {
+  if (printerOptions.newLinesBeforeImage) {
     let index = 0;
-    for (; index <= options.printerOptions.newLinesBeforeImage; index++) {
+    for (; index <= printerOptions.newLinesBeforeImage; index++) {
       commands.push(newLine());
     }
   }
 
   commands.push(image(floydImage));
 
-  if (options.printerOptions.newLinesAfterImage) {
+  if (printerOptions.newLinesAfterImage) {
     let index = 0;
-    for (; index <= options.printerOptions.newLinesAfterImage; index++) {
+    for (; index <= printerOptions.newLinesAfterImage; index++) {
       commands.push(newLine());
     }
   }
 
-  if (options.printerOptions.cutAfterPrint) {
+  if (printerOptions.cutAfterPrint) {
     commands.push(cut());
   }
 

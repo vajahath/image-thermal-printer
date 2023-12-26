@@ -8,13 +8,10 @@ document.getElementById('test-print')?.addEventListener('click', async () => {
   console.log(device);
   console.log('Clicked, preparing data...');
 
-  const printContent: Uint8Array = await generatePrintCommandsForImage({
-    imageToPrint: '/text.png',
-    printerOptions: {
-      cutAfterPrint: true,
-      newLinesAfterImage: 3,
-      printerWidthInPx: 377,
-    },
+  const printContent: Uint8Array = await generatePrintCommandsForImage('/text.png', {
+    cutAfterPrint: true,
+    newLinesAfterImage: 3,
+    printerWidthInPx: 377,
   });
 
   console.log('Prepared print data. Starting to print', printContent);

@@ -1,4 +1,4 @@
-import { generatePrintCommandsForImage } from '@vaju/image-thermal-printer';
+import { generatePrintCommandsForCanvas } from '@vaju/image-thermal-printer';
 
 function readImage(src: string, printWidthInMm: number) {
   return new Promise<HTMLCanvasElement>((resolve, reject) => {
@@ -39,12 +39,9 @@ printButton.addEventListener('click', async () => {
   console.log(device);
   console.log('Clicked, preparing data...');
 
-  const printContent = await generatePrintCommandsForImage({
-    canvasElement: canvas,
-    printerOptions: {
-      cutAfterPrint: true,
-      newLinesAfterImage: 3,
-    },
+  const printContent = generatePrintCommandsForCanvas(canvas, {
+    cutAfterPrint: true,
+    newLinesAfterImage: 3,
   });
 
   console.log('Prepared print data. Starting to print', printContent);
