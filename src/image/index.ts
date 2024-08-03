@@ -1,2 +1,2 @@
-export { Image } from './Image.js';
+export { CanvasImageData } from './Image.js';
 export { imageToRaster, ImageToRasterOptions } from './imageToRaster.js';

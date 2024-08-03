@@ -1,44 +1,62 @@
-import './style.css';
 import { generatePrintCommandsForImage } from '@vaju/image-thermal-printer';
+import { autoLoadPrinter, getPrinter, printerInfo$ } from './usb-printer-provider';
+import { fromEvent, map, shareReplay, startWith, switchMap } from 'rxjs';
 
-let device: USBDevice | undefined;
+document.addEventListener('DOMContentLoaded', async () => {
+  await autoLoadPrinter();
+  console.log('Auto load attempt finished');
 
-document.getElementById('test-print')?.addEventListener('click', async () => {
-  await connectPrinter();
-  console.log(device);
-  console.log('Clicked, preparing data...');
-
-  const printContent: Uint8Array = await generatePrintCommandsForImage('/text.png', {
-    cutAfterPrint: true,
-    newLinesAfterImage: 3,
-    printerWidthInPx: 377,
+  printerInfo$.subscribe(data => {
+    const printerInfoEl = document.getElementById('printer-info');
+    if (!printerInfoEl) throw new Error('No printer info element');
+    printerInfoEl.textContent = JSON.stringify(data, null, 2);
   });
-
-  console.log('Prepared print data. Starting to print', printContent);
-
-  if (!device) {
-    throw new Error('Print device not found');
-  }
-
-  await device.transferOut(3, printContent);
-  console.log('Print completed');
 });
 
-async function connectPrinter() {
-  if (device) {
-    console.log('already connected to device');
+const imageSourceInputElement = document.getElementById('print-source') as HTMLInputElement;
+
+if (!imageSourceInputElement) throw new Error('Unable to detect source image input element');
+
+const imageSource$ = fromEvent(imageSourceInputElement, 'input').pipe(
+  map(event => (event?.target as any).value as string),
+  startWith(imageSourceInputElement.value),
+  shareReplay(1)
+);
+
+imageSource$.subscribe(src => {
+  const imageContainer = document.getElementById('image-container');
+  if (!imageContainer) throw new Error('No image container');
+
+  imageContainer.replaceChildren();
+
+  const img = document.createElement('img');
+  img.src = src;
+
+  imageContainer.appendChild(img);
+});
+
+const imagePrintButtonEl = document.getElementById('image-print');
+
+if (!imagePrintButtonEl) throw new Error('No image print button');
+
+const imagePrintOnClick$ = fromEvent(imagePrintButtonEl, 'click');
+
+imagePrintOnClick$.pipe(switchMap(() => imageSource$)).subscribe(async src => {
+  const printer = await getPrinter();
+  if (!printer) {
+    alert('Printer not authorized / connected');
     return;
   }
 
-  device = await navigator.usb.requestDevice({
-    filters: [],
+  const printContent = await generatePrintCommandsForImage(src, {
+    cutAfterPrint: true,
+    newLinesAfterImage: 1,
+    printerWidthInPx: 377,
+    useDithering: 'floyd-steinberg',
   });
 
-  console.log(device.productName);
-  console.log(device.manufacturerName);
-  console.log(device);
+  console.log('Prepared print data. Starting to print');
 
-  await device.open();
-  await device.selectConfiguration(1);
-  await device.claimInterface(0);
-}
+  await printer.transferOut(3, printContent);
+  console.log('Print completed');
+});

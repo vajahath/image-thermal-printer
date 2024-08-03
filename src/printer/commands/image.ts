@@ -12,9 +12,14 @@ import { GS } from './common.js';
  */
 export function image(
   m: number,
+
+  /** This is the lower byte of the width value. */
   xL: number,
+  /** This is the higher byte of the width value. */
   xH: number,
+  /** This is the lower byte of the height value. */
   yL: number,
+  /** This is the higher byte of the height value */
   yH: number,
   data: ArrayLike<number>
 ) {

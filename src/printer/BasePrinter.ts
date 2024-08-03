@@ -1,4 +1,4 @@
-import { Image, imageToRaster, ImageToRasterOptions } from '../image/index.js';
+import { CanvasImageData, imageToRaster, ImageToRasterOptions } from '../image/index.js';
 
 import { cashdraw as cashdrawCmd } from './commands/cashdraw.js';
 import { LF } from './commands/common.js';
@@ -36,8 +36,9 @@ export function cut(partial = false) {
   };
 }
 
-export function image(img: Image, options?: ImageToRasterOptions) {
+export function image(img: CanvasImageData, options?: ImageToRasterOptions) {
   const size = new ArrayBuffer(4);
+
   const view = new DataView(size);
   view.setUint16(0, Math.ceil(img.width / 8), true);
   view.setUint16(2, img.height, true);

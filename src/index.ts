@@ -1,11 +1,10 @@
-import { type Image } from './image/Image.js';
-import { floydSteinberg } from './image/transforms/index.js';
+import { type CanvasImageData } from './image/Image.js';
 
 import { initialize, image, Cmd, cut, newLine, getData } from './printer/index.js';
 
 export { Cmd };
 
-export function generatePrintCommandsForCanvas(
+export async function generatePrintCommandsForCanvas(
   canvasElement: HTMLCanvasElement,
   printerOptions: BaseOptions
 ) {
@@ -21,11 +20,23 @@ export async function generatePrintCommandsForImage(
   return canvasImageDataToCmdBuffer(canvasImageData, printerOptions);
 }
 
-function canvasImageDataToCmdBuffer(
-  canvasImageData: Image,
+let floydSteinberg: typeof import('./image/transforms/floydSteinberg.js').floydSteinberg;
+
+async function canvasImageDataToCmdBuffer(
+  canvasImageData: CanvasImageData,
   printerOptions: BaseOptions
-): Uint8Array {
-  const floydImage = floydSteinberg(canvasImageData);
+): Promise<Uint8Array> {
+  let transformedImage: CanvasImageData = canvasImageData;
+
+  switch (printerOptions.useDithering) {
+    case 'floyd-steinberg': {
+      floydSteinberg =
+        floydSteinberg ||
+        (await import('./image/transforms/floydSteinberg.js').then(m => m.floydSteinberg));
+      transformedImage = floydSteinberg(canvasImageData);
+      break;
+    }
+  }
 
   const commands: Cmd[] = [initialize()];
 
@@ -36,7 +47,7 @@ function canvasImageDataToCmdBuffer(
     }
   }
 
-  commands.push(image(floydImage));
+  commands.push(image(transformedImage));
 
   if (printerOptions.newLinesAfterImage) {
     let index = 0;
@@ -60,9 +71,10 @@ export interface BaseOptions {
   cutAfterPrint?: boolean;
   newLinesAfterImage?: number;
   newLinesBeforeImage?: number;
+  useDithering?: 'floyd-steinberg';
 }
 
-function readCanvas(canvasElement: HTMLCanvasElement): Image {
+function readCanvas(canvasElement: HTMLCanvasElement): CanvasImageData {
   return {
     data: new Uint8Array(
       canvasElement
@@ -75,7 +87,7 @@ function readCanvas(canvasElement: HTMLCanvasElement): Image {
 }
 
 function readImage(src: string, printWidthInPx: number) {
-  return new Promise<Image>((resolve, reject) => {
+  return new Promise<CanvasImageData>((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = '';
     img.onload = () => {
