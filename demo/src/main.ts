@@ -52,6 +52,7 @@ imagePrintOnClick$.pipe(switchMap(() => imageSource$)).subscribe(async src => {
     cutAfterPrint: true,
     newLinesAfterImage: 1,
     printerWidthInPx: 377,
+    useDithering: 'floyd-steinberg',
   });
 
   console.log('Prepared print data. Starting to print');

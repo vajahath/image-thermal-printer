@@ -39,7 +39,6 @@ export function cut(partial = false) {
 export function image(img: CanvasImageData, options?: ImageToRasterOptions) {
   const size = new ArrayBuffer(4);
 
-  // Todo: --- remove
   const view = new DataView(size);
   view.setUint16(0, Math.ceil(img.width / 8), true);
   view.setUint16(2, img.height, true);
