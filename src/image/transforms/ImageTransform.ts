@@ -1,5 +1,5 @@
-import { Image } from '../Image.js';
+import { CanvasImageData } from '../Image.js';
 
 export interface ImageTransform {
-  (image: Image): Image;
+  (image: CanvasImageData): CanvasImageData;
 }

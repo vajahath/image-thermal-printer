@@ -6,15 +6,19 @@
     <title>Image thermal printer test</title>
   </head>
   <body>
-    <div id="app">
-      <h1>Image Thermal Printer</h1>
-      <div>
-        <p>Test image:</p>
-        <img src="/the-2-time.webp">
-      </div>
-      <br>
-      <button id="test-print" style="background-color: aquamarine;">Print</button>
+    <h1>Thermal printer tester</h1>
+    <hr>
+    <h2>Printer Info</h2>
+    <pre id="printer-info"></pre>
+
+    <h2>Image source</h2>
+    <label for="print-source">Enter print image source.</label>
+    <input id="print-source" type="text" placeholder="path to the image. Eg: ./text.png" value="./text.png">
+    <div>
+      <div id="image-container" style="border: thin solid gray;margin: 10px 0px;display: inline-block;color:gray;padding: 5px;">No image / Loading..</div>
     </div>
+    
+    <button id="image-print">Print</button>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

@@ -1,4 +1,4 @@
-import { type Image } from './image/Image.js';
+import { type CanvasImageData } from './image/Image.js';
 import { floydSteinberg } from './image/transforms/index.js';
 
 import { initialize, image, Cmd, cut, newLine, getData } from './printer/index.js';
@@ -22,7 +22,7 @@ export async function generatePrintCommandsForImage(
 }
 
 function canvasImageDataToCmdBuffer(
-  canvasImageData: Image,
+  canvasImageData: CanvasImageData,
   printerOptions: BaseOptions
 ): Uint8Array {
   const floydImage = floydSteinberg(canvasImageData);
@@ -62,7 +62,7 @@ export interface BaseOptions {
   newLinesBeforeImage?: number;
 }
 
-function readCanvas(canvasElement: HTMLCanvasElement): Image {
+function readCanvas(canvasElement: HTMLCanvasElement): CanvasImageData {
   return {
     data: new Uint8Array(
       canvasElement
@@ -75,7 +75,7 @@ function readCanvas(canvasElement: HTMLCanvasElement): Image {
 }
 
 function readImage(src: string, printWidthInPx: number) {
-  return new Promise<Image>((resolve, reject) => {
+  return new Promise<CanvasImageData>((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = '';
     img.onload = () => {

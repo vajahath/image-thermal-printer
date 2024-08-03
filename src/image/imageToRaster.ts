@@ -1,4 +1,4 @@
-import { Image } from './Image.js';
+import { CanvasImageData } from './Image.js';
 
 export interface ImageToRasterOptions {
   /**
@@ -14,7 +14,7 @@ export interface ImageToRasterOptions {
 const defaultRgbToBlack = ({ r, g, b, a }: Pixel) => a > 0 && (r + g + b) / 3 < 230;
 
 export function imageToRaster(
-  image: Image,
+  image: CanvasImageData,
   { rgbToBlack = defaultRgbToBlack }: ImageToRasterOptions = {}
 ): number[] {
   const pixels = getPixels(image);
@@ -56,7 +56,7 @@ interface Pixel {
   a: number;
 }
 
-function getPixels(image: Image): Pixel[][] {
+function getPixels(image: CanvasImageData): Pixel[][] {
   const { data, width, height } = image;
   const pixels: Pixel[][] = [];
 
